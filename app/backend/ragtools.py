@@ -167,7 +167,7 @@ def attach_rag_tools(rtmt, mongo_connection_string, database_name, collection_na
     num_lists = 100
     dimensions = 1536  # Size of the embeddings
     similarity_algorithm = CosmosDBSimilarityType.COS
-    kind = CosmosDBVectorSearchType.VECTOR_HNSW
+    kind = CosmosDBVectorSearchType.VECTOR_IVF
     m = 16
     ef_construction = 64
     
@@ -177,17 +177,21 @@ def attach_rag_tools(rtmt, mongo_connection_string, database_name, collection_na
 
         documents = extract_text_from_pdfs(pdf_dir)
         print("Documents", len(documents))
-
+        print("Starting with the vector store........")
+        print("EMBEDDINGS: ", openai_embeddings)
+       
         vector_store = AzureCosmosDBVectorSearch.from_documents(
             documents,
             openai_embeddings,
             collection=collection,
             index_name=index_name,
         )
+        print("Vector instance created ...............................")
 
         vector_store.create_index(
             num_lists, dimensions, similarity_algorithm, kind, m, ef_construction
         )
+        print("Vector inndex created ....")
     else:
         print("Vector store already exists, reusing it for querying.")
         vector_store = AzureCosmosDBVectorSearch(
